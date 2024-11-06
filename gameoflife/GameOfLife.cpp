@@ -10,14 +10,14 @@ enum STATE
 {
 	ALIVE='+',
 	DEAD = '-',
-	WAS_ALIVE = '=',
+	WAS_ALIVE = '*',
 };
 
 
 const std::string ALIVE_COLOR = "\033[32m";
 const std::string DIED_COLOR = "\033[34m";
 const std::string WAS_ALIVE_COLOR = "\033[31m";
-const std::string COLOR_RESET = "\033[0m";
+const std::string RESET_COLOR = "\033[0m";
 
 const int SIMULATION_SECOND = 2; 
 
@@ -30,49 +30,6 @@ class Board
 		int rows;
 		int cols;
 		std::vector<std::vector<STATE>> cells;
-	
-	public:
-		Board(int r, int c): 
-			rows(r), 
-			cols(c),
-			cells(rows, std::vector<STATE>(cols, STATE::DEAD)) {}
-		
-
-		void display() const {
-		    for (const auto &row : cells) {
-		        for (STATE val : row) {
-		            std::cout << "\033[32m" << static_cast<char>(val) << "";
-		        }
-		        std::cout << std::endl;
-		    }
-		}
-		
-
-		void displayColor() 
-		{
-			for (const auto &row : cells) {
-		        for (STATE val : row) {
-					char cast_val = static_cast<char>(val);
-					if(val == STATE::ALIVE)
-						std::cout << ALIVE_COLOR << "*";
-					else if (val == STATE::WAS_ALIVE)
-						std::cout << WAS_ALIVE_COLOR << "*";
-					else if (val == STATE::DEAD)
-						std::cout << DIED_COLOR << "*";
-		            //std::cout << "\033[32m" << static_cast<char>(val) << "";
-		        }
-		        std::cout << std::endl;
-		    }
-		}
-
-		void initialize(int numAliveCells) {
-		    srand(time(0)); 
-		    for (int i = 0; i < numAliveCells; i++) {
-		        int randRow = rand() % rows;
-		        int randCol = rand() % cols;
-		        cells[randRow][randCol] = STATE::ALIVE;
-		    }
-		}
 
 
 		std::vector<Position> getNeighbor(int r, int c)
@@ -97,7 +54,7 @@ class Board
 			return neighbors;
 		}
 
-
+	
 		STATE updateAliveCell(int r, int c)
 		{
 			int aliveNeighbor = 0;
@@ -146,13 +103,59 @@ class Board
 			}
 			return newStateCells;
 		}
-		
+
 
 		void updateBoard(std::map<Position, STATE> newUpdateCell)
 		{
 			for(const auto& pos : newUpdateCell)
 				cells[pos.first.first][pos.first.second] = pos.second;
 		}
+
+	
+	public:
+		Board(int r, int c): 
+			rows(r), 
+			cols(c),
+			cells(rows, std::vector<STATE>(cols, STATE::DEAD)) {}
+		
+
+		void initialize(int numAliveCells) {
+		    srand(time(0)); 
+		    for (int i = 0; i < numAliveCells; i++) {
+		        int randRow = rand() % rows;
+		        int randCol = rand() % cols;
+		        cells[randRow][randCol] = STATE::ALIVE;
+		    }
+		}
+
+
+		void display() const {
+		    for (const auto &row : cells) {
+		        for (STATE val : row) {
+		            std::cout << "\033[32m" << static_cast<char>(val) << "";
+		        }
+		        std::cout << std::endl;
+		    }
+		}
+		
+
+		void displayColor() 
+		{
+			for (const auto &row : cells) {
+		        for (STATE val : row) {
+					char cast_val = static_cast<char>(val);
+					if(val == STATE::ALIVE)
+						std::cout << ALIVE_COLOR << "*";
+					else if (val == STATE::WAS_ALIVE)
+						std::cout << WAS_ALIVE_COLOR << "*";
+					else if (val == STATE::DEAD)
+						std::cout << DIED_COLOR << "*";
+		            //std::cout << "\033[32m" << static_cast<char>(val) << "";
+		        }
+		        std::cout << std::endl;
+		    }
+		}
+
 
 		void run()
 		{
@@ -175,18 +178,20 @@ int main(){
 	clearConsole();
 	std::cout << "Initialisation" << std::endl;
 	board.initialize(120);
+	
 	//board.display();
 	board.displayColor();
+	
 	std::this_thread::sleep_for(std::chrono::seconds(SIMULATION_SECOND));
 	std::cout << std::endl;
 	
-	int interation =0;
+	int interation = 0;
+	
 	while (true)
 	{
 		clearConsole();
-		std::cout << COLOR_RESET << "Iteration : " << ++interation << std::endl;
+		std::cout << RESET_COLOR << "Iteration : " << ++interation << std::endl;
 		board.run();
 		std::this_thread::sleep_for(std::chrono::seconds(SIMULATION_SECOND));
 	}
-	
 }
